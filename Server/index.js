@@ -10,20 +10,13 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const http = require('http');  // Needed for socket.io
-const { Server } = require('socket.io');  // Import socket.io
+
 app.use(express.json());
 
 app.use('/uploads', express.static('uploads'));
 
 
 app.use(cors());
-const server = http.createServer(app);  // Create an HTTP server
-const io = new Server(server, {
-    cors: {
-        origin: "http://localhost:3000",  // Replace with your frontend's origin
-        methods: ["GET", "POST"]
-    }
-});
 
 const router = express.Router()
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -97,37 +90,7 @@ app.get('/Details/:ShortsId', async (req, res) => {
         res.status(500).send('Server Error');
     }
 });
-// app.post('/like/:postId', isAuthenticated, async (req, res) => {
-//     const { postId } = req.params;
-//     const userId = req.user.id;
 
-//     try {
-//         // Find the post by ID
-//         const post = await Post.findById(postId);
-
-//         if (!post) {
-//             return res.status(404).json({ message: 'Post not found' });
-//         }
-
-//         // Check if the user has already liked the post
-//         if (post.likes.includes(userId)) {
-//             // If already liked, remove the like
-//             post.likes = post.likes.filter(id => id.toString() !== userId.toString());
-//         } else {
-//             // Otherwise, add the like
-//             post.likes.push(userId);
-//         }
-
-//         // Save the updated post
-//         await post.save();
-
-//         // Respond with the updated post
-//         res.json(post);
-//     } catch (error) {
-//         console.error('Error liking post:', error);
-//         res.status(500).json({ message: 'Error liking post' });
-//     }
-// });
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -138,13 +101,6 @@ const storage = multer.diskStorage({
     }
 });
 
-io.on('connection', (socket) => {
-    console.log('A user connected:', socket.id);
-
-    socket.on('disconnect', () => {
-        console.log('A user disconnected:', socket.id);
-    });
-});
 
 const upload = multer({ storage: storage });
 const ensureDirExists = (dir) => {
@@ -195,10 +151,7 @@ const isAuthenticated = (req, res, next) => {
     }
 };
 
-// In your backend file
 
-// Endpoint to add a comment to a post
-// Endpoint to add a comment to a post
 app.post('/post/:postId/comments', isAuthenticated, async (req, res) => {
     const { postId } = req.params;
     const { commentText } = req.body;
